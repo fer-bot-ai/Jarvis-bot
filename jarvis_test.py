@@ -1,4 +1,6 @@
 print(">>> ARCHIVO JARVIS_TEST.PY EJECUTÁNDOSE <<<")
+
+import time
 import requests
 import pandas as pd
 import ta
@@ -6,7 +8,7 @@ from pybit.unified_trading import HTTP
 
 # ================= CONFIGURACIÓN =================
 API_KEY = "fXRmHS1hxcx7OdhMeJ"
-API_SECRET ="tIBnbTcZbArYAestnjrPXglRXuIZyNdWNnrN"
+API_SECRET = "tIBnbTcZbArYAestnjrPXglRXuIZyNdWNnrN"
 
 BOT_TOKEN = "8488664972:AAEKBU6EzUXNvU3fVAaFNSnwGHFbHF2qAho"
 CHAT_ID = "7262713362"
@@ -25,7 +27,11 @@ session = HTTP(
 def alerta(msg):
     try:
         url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-        requests.post(url, data={"chat_id": CHAT_ID, "text": msg}, timeout=10)
+        requests.post(
+            url,
+            data={"chat_id": CHAT_ID, "text": msg},
+            timeout=10
+        )
     except:
         pass
 
@@ -50,14 +56,13 @@ def obtener_datos():
     return df
 
 # ================= SEÑAL =================
-import time
-
 def analizar_entrada():
+    # Por ahora no hay lógica → solo prueba estabilidad
     return None
-    
-def ejecutar_bot()
-    senal = analizar_entrada() # ya existe
-      
+
+# ================= BOT =================
+def ejecutar_bot():
+    senal = analizar_entrada()
 
     if senal:
         mensaje = (
@@ -71,9 +76,8 @@ def ejecutar_bot()
         alerta(mensaje)
     else:
         print("Entrada no válida. Se mantiene disciplina.")
-        # ❌ NO enviar alerta aquí
 
-
+# ================= MAIN =================
 print("Jarvis en ejecución 24/7")
 alerta("Jarvis Testnet activo. Bot en ejecución 24/7.")
 
@@ -81,13 +85,11 @@ def main():
     while True:
         try:
             ejecutar_bot()
-            time.sleep(3600)  # 1 HORA
+            time.sleep(3600)  # 1 hora
         except Exception as e:
             print("Error:", e)
             alerta(f"Error Jarvis Testnet: {e}")
-            time.sleep(300)  # espera 5 min ante error
+            time.sleep(300)
 
 if __name__ == "__main__":
     main()
-
-
