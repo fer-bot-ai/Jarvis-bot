@@ -100,12 +100,12 @@ def ejecutar_bot():
 
 import time
 
-if __name__ == "__main__":
-    print("Jarvis en ejecución 24/7")
-    while True:
-        try:
-            ejecutar_bot()
-            time.sleep(3600)  # espera 1 hora (timeframe 1H)
-        except Exception as e:
-            alerta(f"Error Jarvis Testnet: {e}")
-            time.sleep(60)
+print("Jarvis en ejecución 24/7")
+
+while True:
+    try:
+        ejecutar_bot()
+        time.sleep(60)  # corre cada 60 segundos
+    except Exception as e:
+        print("Error:", e)
+        time.sleep(30)
