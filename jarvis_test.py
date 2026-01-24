@@ -97,15 +97,19 @@ def ejecutar_bot():
     else:
         print("Entrada no válida. Se mantiene disciplina.")
         alerta("Entrada no válida. Se mantiene disciplina.")
-
 import time
 
 print("Jarvis en ejecución 24/7")
 
-while True:
-    try:
-        ejecutar_bot()
-        time.sleep(60)  # corre cada 60 segundos
-    except Exception as e:
-        print("Error:", e)
-        time.sleep(30)
+def main():
+    while True:
+        try:
+            ejecutar_bot()
+            time.sleep(60)
+        except Exception as e:
+            print("Error:", e)
+            time.sleep(30)
+
+if __name__ == "__main__":
+    main()
+
