@@ -50,38 +50,9 @@ def obtener_datos():
     return df
 
 # ================= SEÑAL =================
-def analizar_entrada():
-    df = obtener_datos()
+import time
 
-    df["ema50"] = ta.trend.ema_indicator(df["close"], 50)
-    df["ema200"] = ta.trend.ema_indicator(df["close"], 200)
-    df["rsi"] = ta.momentum.rsi(df["close"], 14)
-    df["vol_avg"] = df["volume"].rolling(20).mean()
-
-    ultima = df.iloc[-1]
-
-    tendencia = ultima["ema50"] > ultima["ema200"]
-    rsi_ok = 30 <= ultima["rsi"] <= 70
-    volumen_ok = ultima["volume"] > ultima["vol_avg"]
-
-    if tendencia and rsi_ok and volumen_ok:
-        entrada = ultima["close"]
-        sl = df["low"].iloc[-2]
-        tp = entrada + (entrada - sl) * 2
-
-        return {
-            "entrada": round(entrada, 2),
-            "sl": round(sl, 2),
-            "tp": round(tp, 2),
-            "rsi": round(ultima["rsi"], 2)
-        }
-
-    return None
-
-# ================= EJECUCIÓN =================
 def ejecutar_bot():
-    alerta("Jarvis Testnet activo")
-
     senal = analizar_entrada()
 
     if senal:
@@ -96,19 +67,21 @@ def ejecutar_bot():
         alerta(mensaje)
     else:
         print("Entrada no válida. Se mantiene disciplina.")
-        alerta("Entrada no válida. Se mantiene disciplina.")
-import time
+        # ❌ NO enviar alerta aquí
+
 
 print("Jarvis en ejecución 24/7")
+alerta("Jarvis Testnet activo. Bot en ejecución 24/7.")
 
 def main():
     while True:
         try:
             ejecutar_bot()
-            time.sleep(60)
+            time.sleep(3600)  # 1 HORA
         except Exception as e:
             print("Error:", e)
-            time.sleep(30)
+            alerta(f"Error Jarvis Testnet: {e}")
+            time.sleep(300)  # espera 5 min ante error
 
 if __name__ == "__main__":
     main()
