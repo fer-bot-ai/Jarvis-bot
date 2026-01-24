@@ -1,5 +1,3 @@
+ccxt
 requests
-pandas
-numpy
-pybit
-ta
+python-dontenv
