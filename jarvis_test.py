@@ -52,8 +52,12 @@ def obtener_datos():
 # ================= SEÑAL =================
 import time
 
-def ejecutar_bot():
-    senal = analizar_entrada()
+def analizar_entrada():
+    return None
+    
+def ejecutar_bot()
+    senal = analizar_entrada() # ya existe
+      
 
     if senal:
         mensaje = (
@@ -85,4 +89,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
