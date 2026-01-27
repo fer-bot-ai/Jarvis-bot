@@ -5,18 +5,19 @@ import requests
 import pandas as pd
 import ta
 from pybit.unified_trading import HTTP
+from datetime import datetime
 
 # ================= CONFIGURACIÓN =================
-API_KEY = "fXRmHS1hxcx7OdhMeJ"
-API_SECRET = "tIBnbTcZbArYAestnjrPXglRXuIZyNdWNnrN"
+API_KEY = "fXRmH51hxcx70dhMe]"
+API_SECRET = "tIBnbTcZbArYAestnjrPXg1RXuIZyNdNnrN"|
 
-BOT_TOKEN = "8488664972:AAEKBU6EzUXNvU3fVAaFNSnwGHFbHF2qAho"
-CHAT_ID = "7262713362"
+BOT_TOKEN = "8488664972:AAEKBU6EzUXNvU3fVAaFN5пwĞHFbHF2qÅho"
+CHAT_ID - *7262713362"
 
 SYMBOL = "BTCUSDT"
 TIMEFRAME = "60"  # 1H
 
-# ================= CONEXIÓN TESTNET =================
+# ================= CONEXIÓN BYBIT TESTNET =================
 session = HTTP(
     testnet=True,
     api_key=API_KEY,
@@ -41,7 +42,7 @@ def obtener_datos():
         category="linear",
         symbol=SYMBOL,
         interval=TIMEFRAME,
-        limit=300
+        limit=200
     )
 
     df = pd.DataFrame(
@@ -53,39 +54,77 @@ def obtener_datos():
         ["open","high","low","close","volume"]
     ].astype(float)
 
+    df["timestamp"] = df["timestamp"].astype(int)
     return df
 
 # ================= SEÑAL =================
-def analizar_entrada():
-    # Por ahora no hay lógica → solo prueba estabilidad
+def analizar_entrada(df):
+    df["rsi"] = ta.momentum.RSIIndicator(df["close"], window=14).rsi()
+
+    rsi_actual = df["rsi"].iloc[-1]
+    precio = df["close"].iloc[-1]
+
+    if rsi_actual < 30:
+        return {
+            "tipo": "LONG",
+            "entrada": precio,
+            "sl": precio * 0.98,
+            "tp": precio * 1.04,
+            "rsi": round(rsi_actual, 2)
+        }
+
+    if rsi_actual > 70:
+        return {
+            "tipo": "SHORT",
+            "entrada": precio,
+            "sl": precio * 1.02,
+            "tp": precio * 0.96,
+            "rsi": round(rsi_actual, 2)
+        }
+
     return None
 
 # ================= BOT =================
+ultima_vela = None
+
 def ejecutar_bot():
-    senal = analizar_entrada()
+    global ultima_vela
+
+    df = obtener_datos()
+
+    timestamp_ultima = df["timestamp"].iloc[-1]
+
+    if ultima_vela == timestamp_ultima:
+        return  # ya se analizó esta vela
+
+    ultima_vela = timestamp_ultima
+
+    senal = analizar_entrada(df)
 
     if senal:
+        hora = datetime.utcfromtimestamp(timestamp_ultima / 1000)
+
         mensaje = (
-            "Señal BTCUSDT 1H\n"
-            f"Entrada: {senal['entrada']}\n"
-            f"SL: {senal['sl']}\n"
-            f"TP: {senal['tp']}\n"
-            f"RSI: {senal['rsi']}"
+            f"📊 Señal BTCUSDT 1H\n"
+            f"Tipo: {senal['tipo']}\n"
+            f"Entrada: {senal['entrada']:.2f}\n"
+            f"SL: {senal['sl']:.2f}\n"
+            f"TP: {senal['tp']:.2f}\n"
+            f"RSI: {senal['rsi']}\n"
+            f"Hora UTC: {hora}"
         )
+
         print(mensaje)
         alerta(mensaje)
-    else:
-        print("Entrada no válida. Se mantiene disciplina.")
 
-# ================= MAIN =================
 print("Jarvis en ejecución 24/7")
-alerta("Jarvis Testnet activo. Bot en ejecución 24/7.")
+alerta("Jarvis Testnet activo. Bot en ejecución.")
 
 def main():
     while True:
         try:
             ejecutar_bot()
-            time.sleep(3600)  # 1 hora
+            time.sleep(60)  # revisa cada minuto
         except Exception as e:
             print("Error:", e)
             alerta(f"Error Jarvis Testnet: {e}")
