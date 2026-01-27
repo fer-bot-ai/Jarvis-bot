@@ -8,10 +8,10 @@ from pybit.unified_trading import HTTP
 
 # ================= CONFIG =================
 API_KEY = "fXRmH51hxcx70dhMe]"
-API_SECRET = "tIBnbTcZbArYAestnjrPXg1RXuIZyNdNnrN"|
+API_SECRET = "tIBnbTcZbArYAestnjrPXg1RXuIZyNdNnrN"
 
 BOT_TOKEN = "8488664972:AAEKBU6EzUXNvU3fVAaFN5пwĞHFbHF2qÅho"
-CHAT_ID - *7262713362"
+CHAT_ID - "7262713362"
 
 SYMBOL = "BTCUSDT"
 TIMEFRAME = "60"  # 1H
@@ -108,3 +108,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
