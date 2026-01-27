@@ -1,13 +1,12 @@
-print(">>> ARCHIVO JARVIS_TEST.PY EJECUTÁNDOSE <<<")
+print(">>> JARVIS REAL SIGNAL BOT INICIADO <<<")
 
 import time
 import requests
 import pandas as pd
 import ta
 from pybit.unified_trading import HTTP
-from datetime import datetime
 
-# ================= CONFIGURACIÓN =================
+# ================= CONFIG =================
 API_KEY = "fXRmH51hxcx70dhMe]"
 API_SECRET = "tIBnbTcZbArYAestnjrPXg1RXuIZyNdNnrN"|
 
@@ -17,7 +16,7 @@ CHAT_ID - *7262713362"
 SYMBOL = "BTCUSDT"
 TIMEFRAME = "60"  # 1H
 
-# ================= CONEXIÓN BYBIT TESTNET =================
+# ================= CONEXIÓN =================
 session = HTTP(
     testnet=True,
     api_key=API_KEY,
@@ -26,15 +25,8 @@ session = HTTP(
 
 # ================= TELEGRAM =================
 def alerta(msg):
-    try:
-        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-        requests.post(
-            url,
-            data={"chat_id": CHAT_ID, "text": msg},
-            timeout=10
-        )
-    except:
-        pass
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    requests.post(url, data={"chat_id": CHAT_ID, "text": msg}, timeout=10)
 
 # ================= DATOS =================
 def obtener_datos():
@@ -42,7 +34,7 @@ def obtener_datos():
         category="linear",
         symbol=SYMBOL,
         interval=TIMEFRAME,
-        limit=200
+        limit=300
     )
 
     df = pd.DataFrame(
@@ -54,71 +46,55 @@ def obtener_datos():
         ["open","high","low","close","volume"]
     ].astype(float)
 
-    df["timestamp"] = df["timestamp"].astype(int)
     return df
 
-# ================= SEÑAL =================
-def analizar_entrada(df):
-    df["rsi"] = ta.momentum.RSIIndicator(df["close"], window=14).rsi()
+# ================= ESTRATEGIA =================
+def analizar_entrada():
+    df = obtener_datos()
 
-    rsi_actual = df["rsi"].iloc[-1]
-    precio = df["close"].iloc[-1]
+    df["rsi"] = ta.momentum.RSIIndicator(df["close"], 14).rsi()
+    df["ema9"] = ta.trend.EMAIndicator(df["close"], 9).ema_indicator()
+    df["ema21"] = ta.trend.EMAIndicator(df["close"], 21).ema_indicator()
+    df["ema200"] = ta.trend.EMAIndicator(df["close"], 200).ema_indicator()
 
-    if rsi_actual < 30:
+    last = df.iloc[-2]  # vela cerrada
+
+    if (
+        last["rsi"] < 30 and
+        last["close"] > last["ema200"] and
+        last["ema9"] > last["ema21"]
+    ):
+        entrada = last["close"]
+        sl = df["low"].tail(10).min()
+        tp = entrada + (entrada - sl) * 2
+
         return {
-            "tipo": "LONG",
-            "entrada": precio,
-            "sl": precio * 0.98,
-            "tp": precio * 1.04,
-            "rsi": round(rsi_actual, 2)
-        }
-
-    if rsi_actual > 70:
-        return {
-            "tipo": "SHORT",
-            "entrada": precio,
-            "sl": precio * 1.02,
-            "tp": precio * 0.96,
-            "rsi": round(rsi_actual, 2)
+            "entrada": round(entrada, 2),
+            "sl": round(sl, 2),
+            "tp": round(tp, 2),
+            "rsi": round(last["rsi"], 2)
         }
 
     return None
 
 # ================= BOT =================
-ultima_vela = None
-
 def ejecutar_bot():
-    global ultima_vela
-
-    df = obtener_datos()
-
-    timestamp_ultima = df["timestamp"].iloc[-1]
-
-    if ultima_vela == timestamp_ultima:
-        return  # ya se analizó esta vela
-
-    ultima_vela = timestamp_ultima
-
-    senal = analizar_entrada(df)
+    senal = analizar_entrada()
 
     if senal:
-        hora = datetime.utcfromtimestamp(timestamp_ultima / 1000)
-
         mensaje = (
-            f"📊 Señal BTCUSDT 1H\n"
-            f"Tipo: {senal['tipo']}\n"
-            f"Entrada: {senal['entrada']:.2f}\n"
-            f"SL: {senal['sl']:.2f}\n"
-            f"TP: {senal['tp']:.2f}\n"
-            f"RSI: {senal['rsi']}\n"
-            f"Hora UTC: {hora}"
+            "📊 SEÑAL BTCUSDT 1H\n\n"
+            f"Entrada: {senal['entrada']}\n"
+            f"SL: {senal['sl']}\n"
+            f"TP: {senal['tp']}\n"
+            f"RSI: {senal['rsi']}\n\n"
+            "Gestión de riesgo obligatoria."
         )
-
         print(mensaje)
         alerta(mensaje)
 
 print("Jarvis en ejecución 24/7")
-alerta("Jarvis Testnet activo. Bot en ejecución.")
+alerta("Jarvis activo. Monitoreando BTCUSDT 1H.")
 
 def main():
     while True:
@@ -127,7 +103,7 @@ def main():
             time.sleep(60)  # revisa cada minuto
         except Exception as e:
             print("Error:", e)
-            alerta(f"Error Jarvis Testnet: {e}")
+            alerta(f"Error Jarvis: {e}")
             time.sleep(300)
 
 if __name__ == "__main__":
