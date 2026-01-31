@@ -96,17 +96,22 @@ def ejecutar_bot():
 print("Jarvis en ejecución 24/7")
 alerta("Jarvis activo. Monitoreando BTCUSDT 1H.")
 
+from datetime import datetime
+import time
+
 def main():
     while True:
         try:
+            print(f"[{datetime.utcnow()}] Jarvis vivo. Analizando mercado...", flush=True)
+
             ejecutar_bot()
-            time.sleep(60)  # revisa cada minuto
+
+            print(f"[{datetime.utcnow()}] Ciclo completado. Esperando siguiente análisis.", flush=True)
+
+            time.sleep(3600)  # 1 hora
         except Exception as e:
-            print("Error:", e)
-            alerta(f"Error Jarvis: {e}")
+            print(f"[{datetime.utcnow()}] ERROR: {e}", flush=True)
             time.sleep(300)
 
-if __name__ == "__main__":
-    main()
 
 
