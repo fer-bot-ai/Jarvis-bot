@@ -113,5 +113,9 @@ def main():
             print(f"[{datetime.utcnow()}] ERROR: {e}", flush=True)
             time.sleep(300)
 
+if __name__ == "__main__":
+    main()
+
+
 
 
