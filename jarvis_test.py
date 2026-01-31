@@ -90,11 +90,12 @@ def ejecutar_bot():
             f"RSI: {senal['rsi']}\n\n"
             "Gestión de riesgo obligatoria."
         )
-        print(mensaje)
+        print(mensaje, flush=True)
         alerta(mensaje)
-
-print("Jarvis en ejecución 24/7")
-alerta("Jarvis activo. Monitoreando BTCUSDT 1H.")
+    else:
+        mensaje = "🟡 Jarvis activo: sin señal BTCUSDT 1H en este ciclo."
+        print(mensaje, flush=True)
+        alerta(mensaje)
 
 from datetime import datetime
 import time
@@ -115,6 +116,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
